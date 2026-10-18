@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <div class="card">
+    <div class="card-header" style="justify-content: center; flex-direction: column; text-align: center; gap: 0.25rem;">
+      <h1 class="card-title" style="font-size: 1.5rem;">Join FixMyCar AI</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Start repairing and maintaining your vehicles today.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label class="form-label" for="name">{{ form.name.label.text }}</label>
+        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Alex Vance", autocomplete="name", required=True) }}
+        {% for error in form.name.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">{{ form.email.label.text }}</label>
+        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="alex@example.com", autocomplete="email", required=True) }}
+        {% for error in form.email.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">{{ form.password.label.text }}</label>
+        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="At least 6 characters", autocomplete="new-password", required=True) }}
+        {% for error in form.password.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirm_password">{{ form.confirm_password.label.text }}</label>
+        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), placeholder="Repeat your password", autocomplete="new-password", required=True) }}
+        {% for error in form.confirm_password.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        {{ form.submit(class="btn btn-primary btn-block btn-lg") }}
+      </div>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+      Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

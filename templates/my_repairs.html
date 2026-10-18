@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}My Repairs — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem;">My Repair History</h1>
+    <p style="color: var(--text-muted);">Track active repairs, review past maintenance, and reference saved notes.</p>
+  </div>
+  <a href="{{ url_for('repairs') }}" class="btn btn-primary">+ Start New Repair</a>
+</div>
+
+<!-- Section 1: Repairs In Progress -->
+<section style="margin-bottom: 3rem;">
+  <div class="card-header" style="margin-bottom: 1rem;">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      In Progress ({{ in_progress | length }})
+    </h2>
+  </div>
+
+  {% if not in_progress %}
+    <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; border-style: dashed;">
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">You do not have any ongoing repairs right now.</p>
+      <a href="{{ url_for('repairs') }}" class="btn btn-outline btn-sm">Browse Repair Library</a>
+    </div>
+  {% else %}
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      {% for item in in_progress %}
+        <div class="card" style="border-left: 4px solid var(--accent);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span style="font-size: 0.85rem; color: var(--accent); font-weight: 700;">
+                {{ item.vehicle.display_name }}
+              </span>
+              <h3 style="font-size: 1.3rem; font-weight: 800; margin: 0.2rem 0 0.5rem;">{{ item.repair.title }}</h3>
+              <div style="color: var(--text-muted); font-size: 0.85rem;">
+                Started on {{ item.started_at.strftime('%b %d, %Y at %I:%M %p') }}
+              </div>
+            </div>
+
+            <div style="text-align: right;">
+              <a href="{{ url_for('repair_session', session_id=item.id) }}" class="btn btn-primary btn-sm">
+                Continue Repair &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div class="session-progress-wrapper" style="margin-top: 1.25rem;">
+            <div class="progress-info">
+              <span style="color: var(--text-muted); font-size: 0.85rem;">Step {{ item.current_step }} of {{ item.repair.total_steps }}</span>
+              <span style="color: var(--accent); font-size: 0.85rem; font-family: var(--font-mono);">{{ item.progress_percentage }}% Complete</span>
+            </div>
+            <div class="progress-bar-bg" style="height: 8px;">
+              <div class="progress-bar-fill" style="width: {{ item.progress_percentage }}%;"></div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+
+<!-- Section 2: Completed Repairs -->
+<section>
+  <div class="card-header" style="margin-bottom: 1rem;">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      Completed Maintenance & Repairs ({{ completed | length }})
+    </h2>
+  </div>
+
+  {% if not completed %}
+    <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; border-style: dashed;">
+      <p style="color: var(--text-muted);">No completed repairs logged yet.</p>
+    </div>
+  {% else %}
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      {% for item in completed %}
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span class="badge badge-beginner">Completed</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">{{ item.vehicle.display_name }}</span>
+              </div>
+              <h3 style="font-size: 1.3rem; font-weight: 800;">{{ item.repair.title }}</h3>
+            </div>
+
+            <div style="text-align: right; font-size: 0.85rem; color: var(--text-muted);">
+              <div><strong>Finished:</strong> {{ item.completed_at.strftime('%b %d, %Y') if item.completed_at else 'Completed' }}</div>
+              <div><small>Started: {{ item.started_at.strftime('%b %d, %Y') }}</small></div>
+            </div>
+          </div>
+
+          <!-- Notes Area -->
+          <div style="background-color: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-top: 0.75rem;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Service Notes & Part Records:</span>
+            </div>
+            
+            <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5; margin-bottom: 0.75rem;">
+              {{ item.notes or 'No specific notes recorded for this service.' }}
+            </p>
+
+            <details>
+              <summary style="font-size: 0.85rem; color: var(--accent); cursor: pointer; user-select: none;">
+                Edit Notes
+              </summary>
+              <form method="POST" action="{{ url_for('update_repair_notes', session_id=item.id) }}" style="margin-top: 0.75rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <textarea name="notes" class="form-control" rows="2" style="font-size: 0.9rem; margin-bottom: 0.5rem;">{{ item.notes or '' }}</textarea>
+                <button type="submit" class="btn btn-secondary btn-sm">Update Notes</button>
+              </form>
+            </details>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

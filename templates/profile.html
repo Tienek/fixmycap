@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 600px;">
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h1 class="card-title">User Profile</h1>
+      <span class="badge badge-beginner">Active Member</span>
+    </div>
+
+    <!-- Account Details -->
+    <div style="margin-bottom: 2rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background-color: var(--bg-surface-elevated); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Vehicles Saved</div>
+          <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent);">{{ vehicles_count }}</div>
+        </div>
+
+        <div style="background-color: var(--bg-surface-elevated); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Repairs Completed</div>
+          <div style="font-size: 1.75rem; font-weight: 800; color: var(--accent);">{{ repairs_completed_count }}</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Email Address:</span>
+          <strong>{{ current_user.email }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-subtle);">
+          <span style="color: var(--text-muted);">Account Created:</span>
+          <span>{{ current_user.created_at.strftime('%B %d, %Y') }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Profile Name Form -->
+    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;">Update Account Details</h2>
+    <form method="POST" action="{{ url_for('profile') }}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label class="form-label" for="name">{{ form.name.label.text }}</label>
+        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), required=True) }}
+        {% for error in form.name.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top: 1.25rem;">
+        {{ form.submit(class="btn btn-primary btn-block") }}
+      </div>
+    </form>
+
+    <!-- Logout Area -->
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">Session Security</span>
+      <form action="{{ url_for('logout') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger btn-sm">Sign Out of Account</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

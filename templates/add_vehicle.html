@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action_title }} — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 600px;">
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('garage') }}" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--text-muted); font-size: 0.9rem;">
+      &larr; Back to My Garage
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h1 class="card-title">{{ action_title }}</h1>
+      <span style="font-size: 0.85rem; color: var(--text-muted);">Vehicle Profile</span>
+    </div>
+
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="brand">{{ form.brand.label.text }}</label>
+          {{ form.brand(class="form-control" + (" is-invalid" if form.brand.errors else ""), placeholder="e.g. Toyota, Honda, Ford", required=True) }}
+          {% for error in form.brand.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="model">{{ form.model.label.text }}</label>
+          {{ form.model(class="form-control" + (" is-invalid" if form.model.errors else ""), placeholder="e.g. Camry, Civic, F-150", required=True) }}
+          {% for error in form.model.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="year">{{ form.year.label.text }}</label>
+          {{ form.year(class="form-control" + (" is-invalid" if form.year.errors else ""), placeholder="e.g. 2018", required=True) }}
+          {% for error in form.year.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="engine">{{ form.engine.label.text }}</label>
+          {{ form.engine(class="form-control" + (" is-invalid" if form.engine.errors else ""), placeholder="e.g. 2.5L 4-Cyl, 3.5L V6", required=True) }}
+          {% for error in form.engine.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="vin">{{ form.vin.label.text }}</label>
+          {{ form.vin(class="form-control" + (" is-invalid" if form.vin.errors else ""), placeholder="17-character VIN (optional)") }}
+          <div class="form-text">Used for reference and parts accuracy.</div>
+          {% for error in form.vin.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="mileage">{{ form.mileage.label.text }}</label>
+          {{ form.mileage(class="form-control" + (" is-invalid" if form.mileage.errors else ""), placeholder="e.g. 65000") }}
+          <div class="form-text">Optional odometer reading.</div>
+          {% for error in form.mileage.errors %}
+            <div class="form-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+        {{ form.submit(class="btn btn-primary btn-block btn-lg") }}
+        <a href="{{ url_for('garage') }}" class="btn btn-outline btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Step {{ current_step }} of {{ total_steps }} — {{ repair.title }} — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="session-container">
+  <!-- Top Navigation Link -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+    <a href="{{ url_for('my_repairs') }}" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+      &larr; Save & Exit to My Repairs
+    </a>
+    <span class="badge badge-category">Active Workshop Session</span>
+  </div>
+
+  <!-- Header Card: Vehicle & Guide Meta -->
+  <div class="session-header-card">
+    <div class="session-vehicle-bar">
+      <span>Vehicle: <strong style="color: var(--text-main);">{{ vehicle.display_name }}</strong></span>
+      <span class="badge badge-{{ repair.difficulty | lower }}">{{ repair.difficulty }}</span>
+    </div>
+
+    <h1 style="font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem;">{{ repair.title }}</h1>
+
+    <!-- Progress Bar -->
+    <div class="session-progress-wrapper">
+      <div class="progress-info">
+        <span style="color: var(--text-muted);">Step {{ current_step }} of {{ total_steps }}</span>
+        <span style="color: var(--accent); font-family: var(--font-mono);">{{ session_record.progress_percentage }}% Complete</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ session_record.progress_percentage }}%;"></div>
+      </div>
+    </div>
+
+    <!-- Step Navigation Dots -->
+    <div class="step-navigation-dots">
+      {% for s in steps %}
+        <form method="POST" action="{{ url_for('update_repair_step', session_id=session_record.id) }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="target_step" value="{{ s.step_number }}">
+          <button type="submit" 
+                  class="step-dot-btn {% if s.step_number == current_step %}active{% elif s.step_number < current_step %}completed{% endif %}"
+                  title="Jump to Step {{ s.step_number }}: {{ s.title }}">
+            {{ s.step_number }}
+          </button>
+        </form>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Big Step Focus Card -->
+  {% if current_step_obj %}
+    <div class="step-hero-card highlight">
+      <div class="step-number-pill">
+        STEP {{ current_step_obj.step_number }} OF {{ total_steps }}
+      </div>
+
+      <h2 class="step-hero-title">{{ current_step_obj.title }}</h2>
+
+      <div class="step-hero-desc">
+        {{ current_step_obj.description }}
+      </div>
+
+      {% if current_step_obj.warning %}
+        <div class="step-warning-box" style="margin-top: 1.5rem; font-size: 1rem; padding: 1rem 1.25rem;">
+          <div style="font-weight: 800; color: #fbbf24; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            CAUTION
+          </div>
+          {{ current_step_obj.warning }}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Step Controls: Prev / Next / Finish -->
+  <div class="session-controls">
+    <!-- Previous Step Form -->
+    <form method="POST" action="{{ url_for('update_repair_step', session_id=session_record.id) }}" style="width: 100%;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="direction" value="prev">
+      <button type="submit" id="prev-step-btn" class="btn btn-secondary btn-block btn-lg" {% if current_step <= 1 %}disabled style="opacity: 0.4; cursor: not-allowed;"{% endif %}>
+        &larr; Previous Step
+      </button>
+    </form>
+
+    <!-- Next Step or Finish -->
+    {% if current_step < total_steps %}
+      <form method="POST" action="{{ url_for('update_repair_step', session_id=session_record.id) }}" style="width: 100%;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="direction" value="next">
+        <button type="submit" id="next-step-btn" class="btn btn-primary btn-block btn-lg">
+          Next Step &rarr;
+        </button>
+      </form>
+    {% else %}
+      <button type="button" class="btn btn-primary btn-block btn-lg" onclick="document.getElementById('finish-modal').scrollIntoView({behavior: 'smooth'}); document.getElementById('notes-input').focus();">
+        ✓ Complete & Save Repair
+      </button>
+    {% endif %}
+  </div>
+
+  <!-- Finish & Notes Form Area -->
+  <div id="finish-modal" class="card" style="margin-top: 2rem; border-color: var(--accent-border); background-color: var(--bg-surface);">
+    <div class="card-header">
+      <h3 class="card-title" style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        Finish & Log This Repair
+      </h3>
+      {% if session_record.status == 'COMPLETED' %}
+        <span class="badge badge-beginner">Completed</span>
+      {% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('finish_repair_session', session_id=session_record.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label class="form-label" for="notes-input">Maintenance Notes & Part Details (Optional):</label>
+        <textarea id="notes-input" name="notes" class="form-control" rows="3" placeholder="e.g. Installed 5.2 qt of 0W-20 Pennzoil Platinum, OEM filter #90915-YZZN1. Reset maintenance reminder.">{{ session_record.notes or '' }}</textarea>
+        <div class="form-text">These notes will be saved permanently in your vehicle's service history.</div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 1.25rem;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          Complete Repair & Save to History
+        </button>
+        <a href="{{ url_for('my_repairs') }}" class="btn btn-outline btn-lg">
+          Exit Without Completing
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

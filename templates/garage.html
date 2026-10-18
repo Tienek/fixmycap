@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}My Garage — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="card-header" style="border: none; padding: 0; margin-bottom: 2rem;">
+  <div>
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem;">My Garage</h1>
+    <p style="color: var(--text-muted);">Manage your vehicles and their maintenance profiles.</p>
+  </div>
+  <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary">+ Add Vehicle</a>
+</div>
+
+{% if not vehicles %}
+  <div class="card" style="text-align: center; padding: 3.5rem 1.5rem; border-style: dashed;">
+    <div style="width: 60px; height: 60px; border-radius: 50%; background-color: var(--bg-surface-elevated); margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="3" width="15" height="13"></rect>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+      </svg>
+    </div>
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">No Vehicles Saved Yet</h2>
+    <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 1.5rem;">
+      Add your car, truck, or SUV to start personalized repair sessions and track maintenance history.
+    </p>
+    <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary btn-lg">Add My First Vehicle</a>
+  </div>
+{% else %}
+  <div class="vehicles-grid">
+    {% for vehicle in vehicles %}
+      <div class="vehicle-card">
+        <div>
+          <div class="vehicle-header">
+            <div>
+              <span style="font-size: 0.85rem; color: var(--accent); font-weight: 700; font-family: var(--font-mono);">
+                {{ vehicle.year }}
+              </span>
+              <h2 class="vehicle-title">{{ vehicle.brand }} {{ vehicle.model }}</h2>
+            </div>
+          </div>
+          <ul class="vehicle-specs">
+            <li>
+              <span>Engine</span>
+              <strong>{{ vehicle.engine }}</strong>
+            </li>
+            <li>
+              <span>Mileage</span>
+              <strong>{{ "{:,}".format(vehicle.mileage) + ' miles' if vehicle.mileage else 'Not recorded' }}</strong>
+            </li>
+            <li>
+              <span>VIN</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.825rem;">{{ vehicle.vin or 'None' }}</strong>
+            </li>
+            <li>
+              <span>Added On</span>
+              <span style="color: var(--text-muted); font-size: 0.825rem;">{{ vehicle.created_at.strftime('%b %d, %Y') }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <div style="margin-bottom: 0.75rem;">
+            <a href="{{ url_for('repairs') }}" class="btn btn-primary btn-block btn-sm">
+              Start Repair on this Car
+            </a>
+          </div>
+          <div class="vehicle-actions">
+            <a href="{{ url_for('edit_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">
+              Edit Details
+            </a>
+            <form action="{{ url_for('delete_vehicle', vehicle_id=vehicle.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this vehicle from your garage? This cannot be undone.');" style="display: inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-danger btn-sm" title="Delete vehicle">
+                Delete
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

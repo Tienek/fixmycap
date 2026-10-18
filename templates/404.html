@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ error_title or '404 - Page Not Found' }} — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 4rem auto; text-align: center; padding: 3rem 2rem;">
+  <div style="font-size: 3.5rem; color: var(--accent); margin-bottom: 1rem; line-height: 1;">
+    ⚠️
+  </div>
+  <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.75rem;">
+    {{ error_title or 'Page Not Found' }}
+  </h1>
+  <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 2rem; line-height: 1.6;">
+    {{ error_message or 'The automotive repair guide, page, or vehicle profile you requested could not be found or has been moved.' }}
+  </p>
+  <div style="display: flex; justify-content: center; gap: 1rem;">
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Home</a>
+    <a href="{{ url_for('repairs') }}" class="btn btn-secondary">Browse Repairs</a>
+  </div>
+</div>
+{% endblock %}

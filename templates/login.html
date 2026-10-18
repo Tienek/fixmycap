@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <div class="card">
+    <div class="card-header" style="justify-content: center; flex-direction: column; text-align: center; gap: 0.25rem;">
+      <h1 class="card-title" style="font-size: 1.5rem;">Welcome Back</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in to access your garage and repair guides.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label class="form-label" for="email">{{ form.email.label.text }}</label>
+        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="name@example.com", autocomplete="email", required=True) }}
+        {% for error in form.email.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">{{ form.password.label.text }}</label>
+        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="Enter your password", autocomplete="current-password", required=True) }}
+        {% for error in form.password.errors %}
+          <div class="form-error">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top: 1.5rem;">
+        {{ form.submit(class="btn btn-primary btn-block btn-lg") }}
+      </div>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+      Don't have an account yet? <a href="{{ url_for('register') }}">Create an account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

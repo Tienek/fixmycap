@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Repair Library — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem;">Automotive Repair Library</h1>
+  <p style="color: var(--text-muted);">Practical step-by-step repair and maintenance guides designed for home car owners.</p>
+</div>
+
+<!-- Filter and Search Bar -->
+<div class="filter-bar">
+  <div class="filter-categories">
+    {% for cat in categories %}
+      <a href="{{ url_for('repairs', category=cat if cat != 'All' else None, q=search_query if search_query else None) }}" 
+         class="filter-btn {% if current_category | lower == cat | lower %}active{% endif %}">
+        {{ cat }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <form method="GET" action="{{ url_for('repairs') }}" class="search-form">
+    {% if current_category and current_category != 'All' %}
+      <input type="hidden" name="category" value="{{ current_category }}">
+    {% endif %}
+    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search guides by name..." style="padding: 0.5rem 0.85rem; font-size: 0.9rem;">
+    <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+    {% if search_query or (current_category and current_category != 'All') %}
+      <a href="{{ url_for('repairs') }}" class="btn btn-outline btn-sm" title="Clear search and filters">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+{% if not repairs %}
+  <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No Repair Guides Found</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+      No guides match your search criteria. Try a different search term or category.
+    </p>
+    <a href="{{ url_for('repairs') }}" class="btn btn-primary">Reset Filters</a>
+  </div>
+{% else %}
+  <div class="repairs-grid">
+    {% for repair in repairs %}
+      <div class="repair-card">
+        <div>
+          <div class="repair-card-meta">
+            <span class="badge badge-category">{{ repair.category }}</span>
+            <span class="badge badge-{{ repair.difficulty | lower }}">{{ repair.difficulty }}</span>
+          </div>
+          <h2 class="repair-card-title">{{ repair.title }}</h2>
+          <p class="repair-card-desc">{{ repair.description }}</p>
+        </div>
+        <div class="repair-card-footer">
+          <span class="repair-time-estimate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {{ repair.estimated_minutes }} min
+          </span>
+          <a href="{{ url_for('repair_detail', repair_id=repair.id) }}" class="btn btn-primary btn-sm">
+            View Guide &rarr;
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

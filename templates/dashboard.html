@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — FixMyCar AI{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.25rem;">Welcome back, {{ current_user.name }}!</h1>
+  <p style="color: var(--text-muted);">Here is an overview of your garage and maintenance activity.</p>
+</div>
+
+<!-- My Garage Summary Section -->
+<section style="margin-bottom: 2.5rem;">
+  <div class="card-header" style="padding-bottom: 0.5rem; margin-bottom: 1rem;">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="3" width="15" height="13"></rect>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+        <circle cx="18.5" cy="18.5" r="2.5"></circle>
+      </svg>
+      My Garage
+    </h2>
+    <div>
+      {% if vehicles %}
+        <a href="{{ url_for('garage') }}" class="btn btn-outline btn-sm">Manage Garage</a>
+        <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary btn-sm">+ Add Vehicle</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not vehicles %}
+    <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; border-style: dashed;">
+      <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--bg-surface-elevated); margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </div>
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Your Garage is Empty</h3>
+      <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 1.5rem;">
+        Add your car to track maintenance history, record repairs, and receive tailored step-by-step guides.
+      </p>
+      <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary">Add My Car</a>
+    </div>
+  {% else %}
+    <div class="vehicles-grid">
+      {% for vehicle in vehicles %}
+        <div class="vehicle-card">
+          <div>
+            <div class="vehicle-header">
+              <div>
+                <span style="font-size: 0.85rem; color: var(--accent); font-weight: 700;">{{ vehicle.year }}</span>
+                <h3 class="vehicle-title">{{ vehicle.brand }} {{ vehicle.model }}</h3>
+              </div>
+            </div>
+            <ul class="vehicle-specs">
+              <li><span>Engine:</span> <strong>{{ vehicle.engine }}</strong></li>
+              {% if vehicle.mileage %}
+                <li><span>Mileage:</span> <strong>{{ "{:,}".format(vehicle.mileage) }} mi</strong></li>
+              {% endif %}
+              {% if vehicle.vin %}
+                <li><span>VIN:</span> <strong style="font-family: var(--font-mono); font-size: 0.8rem;">{{ vehicle.vin }}</strong></li>
+              {% endif %}
+            </ul>
+          </div>
+          <div class="vehicle-actions">
+            <a href="{{ url_for('repairs') }}" class="btn btn-outline btn-sm btn-block">Find Repairs</a>
+            <a href="{{ url_for('edit_vehicle', vehicle_id=vehicle.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+
+<!-- Active Repairs In Progress -->
+{% if repairs_in_progress %}
+<section style="margin-bottom: 2.5rem;">
+  <div class="card-header" style="padding-bottom: 0.5rem; margin-bottom: 1rem;">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      Repairs In Progress
+    </h2>
+    <a href="{{ url_for('my_repairs') }}" class="btn btn-outline btn-sm">View All History</a>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 1rem;">
+    {% for session in repairs_in_progress %}
+      <div class="card" style="border-left: 4px solid var(--accent);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.85rem;">
+          <div>
+            <div style="font-size: 0.85rem; color: var(--accent); font-weight: 600;">
+              {{ session.vehicle.display_name }}
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700;">{{ session.repair.title }}</h3>
+          </div>
+          <a href="{{ url_for('repair_session', session_id=session.id) }}" class="btn btn-primary btn-sm">
+            Continue Repair &rarr;
+          </a>
+        </div>
+
+        <div class="session-progress-wrapper" style="margin-top: 0;">
+          <div class="progress-info">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Step {{ session.current_step }} of {{ session.repair.total_steps }}</span>
+            <span style="color: var(--accent); font-size: 0.85rem;">{{ session.progress_percentage }}% Complete</span>
+          </div>
+          <div class="progress-bar-bg" style="height: 8px;">
+            <div class="progress-bar-fill" style="width: {{ session.progress_percentage }}%;"></div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Available Repair Guides -->
+<section style="margin-bottom: 2.5rem;">
+  <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.75rem;">
+    <div>
+      <h2 class="section-title">Available Repair Guides</h2>
+      <p class="section-subtitle">Select a procedure to inspect tools, warnings, and step-by-step instructions.</p>
+    </div>
+    <a href="{{ url_for('repairs') }}" class="btn btn-outline btn-sm">Explore All Guides &rarr;</a>
+  </div>
+
+  <div class="repairs-grid">
+    {% for guide in guides %}
+      <div class="repair-card">
+        <div>
+          <div class="repair-card-meta">
+            <span class="badge badge-category">{{ guide.category }}</span>
+            <span class="badge badge-{{ guide.difficulty | lower }}">{{ guide.difficulty }}</span>
+          </div>
+          <h3 class="repair-card-title">{{ guide.title }}</h3>
+          <p class="repair-card-desc">{{ guide.description }}</p>
+        </div>
+        <div class="repair-card-footer">
+          <span class="repair-time-estimate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {{ guide.estimated_minutes }} min
+          </span>
+          <a href="{{ url_for('repair_detail', repair_id=guide.id) }}" class="btn btn-outline btn-sm">View Guide</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Recently Completed Repairs -->
+{% if recent_completed %}
+<section>
+  <div class="card-header" style="padding-bottom: 0.5rem; margin-bottom: 1rem;">
+    <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      Recently Completed Repairs
+    </h2>
+    <a href="{{ url_for('my_repairs') }}" class="btn btn-outline btn-sm">View Full History</a>
+  </div>
+
+  <div class="card" style="padding: 0;">
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Repair</th>
+            <th>Vehicle</th>
+            <th>Completed</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recent_completed %}
+            <tr>
+              <td><strong>{{ item.repair.title }}</strong></td>
+              <td style="color: var(--text-muted);">{{ item.vehicle.display_name }}</td>
+              <td style="color: var(--text-muted); font-size: 0.85rem;">{{ item.completed_at.strftime('%b %d, %Y') if item.completed_at else 'Completed' }}</td>
+              <td style="color: var(--text-muted); font-size: 0.85rem; max-width: 300px;">
+                {{ item.notes or 'No notes recorded' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

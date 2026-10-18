@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: fixmycar-ai
+    env: python
+    buildCommand: pip install -r requirements.txt && flask db upgrade && python seed.py
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fixmycar-db
+          property: connectionString
+
+databases:
+  - name: fixmycar-db
+    databaseName: fixmycar
+    user: fixmycar_user
+    plan: free

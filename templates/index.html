@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}FixMyCar AI — Repair Your Car At Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-tag">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+    </svg>
+    Practical Home Auto Care
+  </div>
+  <h1 class="hero-title">REPAIR YOUR CAR AT HOME.</h1>
+  <p class="hero-subtitle">
+    Simple repair guides, clear instructions, and practical maintenance help for your car.
+  </p>
+  <div class="hero-actions">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+    {% else %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+    {% endif %}
+    <a href="{{ url_for('repairs') }}" class="btn btn-secondary btn-lg">Explore Repairs</a>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="features-section">
+  <div class="section-header" style="text-align: center;">
+    <h2 class="section-title">How FixMyCar AI Works</h2>
+    <p class="section-subtitle">Empowering everyday car owners to safely maintain their vehicles and save money.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon-wrapper">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        </svg>
+      </div>
+      <h3 class="feature-title">1. Add Your Vehicles</h3>
+      <p class="feature-desc">Store your car's make, model, year, and engine specifications in your private digital garage.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-wrapper">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <h3 class="feature-title">2. Choose a Repair Guide</h3>
+      <p class="feature-desc">Browse step-by-step instructions for routine maintenance, brake jobs, electrical replacements, and filters.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-wrapper">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h3 class="feature-title">3. Track Step Progress</h3>
+      <p class="feature-desc">Follow high-contrast interactive steps in your workshop. Progress saves automatically to PostgreSQL.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Guides Section -->
+{% if featured_repairs %}
+<section style="margin-top: 3rem;">
+  <div class="section-header" style="display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h2 class="section-title">Popular Repair Guides</h2>
+      <p class="section-subtitle">Tried and verified procedures written with safety-first standards.</p>
+    </div>
+    <a href="{{ url_for('repairs') }}" class="btn btn-outline btn-sm">View All 8 Guides &rarr;</a>
+  </div>
+
+  <div class="repairs-grid">
+    {% for repair in featured_repairs %}
+      <div class="repair-card">
+        <div>
+          <div class="repair-card-meta">
+            <span class="badge badge-category">{{ repair.category }}</span>
+            <span class="badge badge-{{ repair.difficulty | lower }}">{{ repair.difficulty }}</span>
+          </div>
+          <h3 class="repair-card-title">{{ repair.title }}</h3>
+          <p class="repair-card-desc">{{ repair.description }}</p>
+        </div>
+        <div class="repair-card-footer">
+          <span class="repair-time-estimate">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            {{ repair.estimated_minutes }} min
+          </span>
+          <a href="{{ url_for('repair_detail', repair_id=repair.id) }}" class="btn btn-outline btn-sm">View Guide</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Safety Callout Banner -->
+<section style="margin-top: 4rem;">
+  <div class="card" style="border-color: var(--color-warning-border); background-color: rgba(245, 158, 11, 0.05); display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+    <div style="background-color: var(--color-warning-bg); border: 1px solid var(--color-warning-border); border-radius: var(--radius-sm); padding: 0.75rem; color: var(--color-warning);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+    <div style="flex: 1; min-width: 250px;">
+      <h4 style="color: #fde68a; font-size: 1.1rem; margin-bottom: 0.25rem;">Safety Always Comes First</h4>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Never support a vehicle with a jack alone. Use rated stands, wheel chocks, eye protection, and gloves. Complex brake hydraulics and electrical work should only be performed if you have the proper tools and skills.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
