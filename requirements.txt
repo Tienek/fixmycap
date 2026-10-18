@@ -7,4 +7,4 @@ email-validator
 psycopg2-binary
 psycopg
 gunicorn
-python-dot
+python-dotenv
